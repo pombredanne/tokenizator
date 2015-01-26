@@ -19,9 +19,13 @@ import tokenizator.SourceCodeSnippet;
 /**
  *
  * @author Nuno Brito, 21st of January 2014 in Soufflenheim, France
+ * @author Vasiliy Vadimov, Nizhny Novgorod, Russia
  */
 public abstract class TemplateCodeConvertToTokens {
 
+    protected String tokensFile = "";
+    protected int tokenMinSize = 60;
+    
     /**
      * Read the list of tokens to translate from disk. This method is only
      * called when the object is first initialized.
