@@ -21,6 +21,7 @@ import java.util.ArrayList;
 /**
  *
  * @author Nuno Brito, 16th of August 2014 in Darmstadt, Germany
+ * @author Vadimov Vasiliy, Nizhny Novgorod, Russia
  */
 public interface TemplateCodeSplit {
     

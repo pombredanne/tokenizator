@@ -26,14 +26,9 @@ import utils.text;
 /**
  *
  * @author Nuno Brito, 16th of August 2014 in Darmstadt, Germany
+ * @author Vasiliy Vadimov, Nizhny Novgorod, Russia
  */
 public class CodeSplitJava implements TemplateCodeSplit {
-
-    
-    // settings
-    final boolean debug = false;
-    static File sourceFile = new File("test/tokenize_samples", "source_android.java");
-        
     
     // final definitions
     final String blockCommentStart = " " + "/" + "*";
@@ -85,7 +80,6 @@ public class CodeSplitJava implements TemplateCodeSplit {
                 int i1 = line.indexOf(blockCommentStart);
                 line = line.substring(0,i1);
             }
-            
             
             // get a trimmed line for verification
             final String trimmedLine = line.trim();
@@ -238,8 +232,6 @@ public class CodeSplitJava implements TemplateCodeSplit {
     //TODO still not handling code inside the /** declaration block
      return true;
     }
-    
-    
 
     /**
      * Ensures that we don't have commented code which might cause
@@ -275,32 +267,4 @@ public class CodeSplitJava implements TemplateCodeSplit {
         // return the line without the comment position
         return line.substring(0, i1-1);
     }
-    
-    
-//    /**
-//     * Test if our code is working or not.
-//     * @param args 
-//     */
-//    public static void main(String[] args) {
-//        // test if our code is working as intended
-//        CodeSplitJava scan = new CodeSplitJava();
-//        // define a file to read source code and use as test
-//        if(sourceFile.exists() == false){
-//            System.err.println("Didn't found: " + sourceFile.getAbsolutePath());
-//            return;
-//        }
-//        String sourceCode = files.readAsString(sourceFile);
-////        System.out.println(sourceCode);
-//        // split the methods
-//        ArrayList<SourceCodeSnippet> methods = scan.split(sourceCode);
-//        // iterate methods
-//        for(SourceCodeSnippet method : methods){
-//            // print them to screen
-//            System.out.println(method.getLineStart() + ".." + method.getLineEnd());
-//            System.out.println(method.getText()
-//                    + "\n------------------");
-//        }
-//    }
-    
-    
 }

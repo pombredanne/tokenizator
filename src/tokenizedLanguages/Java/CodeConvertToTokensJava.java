@@ -27,44 +27,20 @@ import utils.text;
 /**
  *
  * @author Nuno Brito, 26th of October 2014 in Tettnang, Germany
+ * @author Vasiliy Vadimov, Nizhny Novgorod, Russia
  */
-public class CodeConvertToTokensJava extends TemplateCodeConvertToTokens{
-
-    
-    // definitions that can be changed
-    final private String javaTokensFile = "tokens-java.txt";
-    final private int tokenMinSize = 60;
-    
-    
-    // variables used inside the code
-    private String JavaTokenContent;
-    // where we store our tokensListJava
-    private ArrayList<String[]> tokensListJava;
-    
+public final class CodeConvertToTokensJava extends TemplateCodeConvertToTokens{
     
     /**
-     * Reads the file with Java tokensListJava from disk. This file contains the definitions
+     * Reads the file with Java tokensListfrom disk. This file contains the definitions
      * that we will use for translating the normal source code onto the tokenized
      * form.
      */
     @Override
     public void initializeTokens() {
-        // initialize our java tokensListJava file
-        final File tokenFile = new File(javaTokensFile);
-        // intialize the array list
-        tokensListJava= new ArrayList();
-        
-        // does this token file exists somewhere?
-        if(tokenFile.exists()){
-            // read the file from disk
-            JavaTokenContent = files.readAsString(tokenFile);
-        } else{
-            // use a version that we included on this source code file
-            JavaTokenContent = defaultTokenContentJava;
-        }
-        
+        super.initializeTokens();
         // create an array with the lines
-        final String[] lines = JavaTokenContent.split("\n");
+        final String[] lines = tokenContent.split("\n");
         // iterate each line
         for(final String line : lines){
             // avoid comment lines
@@ -77,28 +53,11 @@ public class CodeConvertToTokensJava extends TemplateCodeConvertToTokens{
             if(token.length > 1){
                 // add the new token to be replaced
                 String[] item = new String[]{token[0], token[1]};
-                tokensListJava.add(item);
+                tokensList.add(item);
             }
         }
-        
     }
    
-    @Override
-    public SourceCodeFile convertFile(final File sourceCodeFile) {
-         // read the file from disk
-        final String sourceCode = utils.files.readAsString(sourceCodeFile);
-        // convert the source code text to our object
-        SourceCodeFile result = convertSourceText(sourceCode);
-        // was the result valid?
-        if(result == null){
-            return null;
-        }
-        // specify the file inside the source code file
-        result.setFile(sourceCodeFile);
-        // all done
-        return result;
-    }
-
     /**
      * Splits the source code of a given file into different methods and
      * then converts each method to a tokenized method that we use for our
@@ -112,84 +71,11 @@ public class CodeConvertToTokensJava extends TemplateCodeConvertToTokens{
         if(sourceCodeText.contains("public interface ")){
             return null;
         }
-          
         // initializate our method that breaks methods into an array
-        CodeSplitJava methodSplitter = 
-                new CodeSplitJava();
-
-        // get a list of all the methods
-        //TODO this causes another loop, we can get rid of this ArrayList
-        ArrayList<SourceCodeSnippet> snippets = methodSplitter.split(sourceCodeText);
-        
-        // no point in continuing when this is null
-        if(snippets == null || snippets.isEmpty()){
-            return null;
-        }
-      
-        // get the iterator model
-        Iterator<SourceCodeSnippet> iterator = snippets.listIterator();
-        // run through each item
-        while(iterator.hasNext()){
-            // get the next item
-            SourceCodeSnippet snippet = iterator.next();
-            // convert the code to tokens
-            final SourceCodeSnippet  tokenizedCode = ConvertSnippetToTokens(snippet.getText());
-            // add up the new token data
-            snippet.setTokens(tokenizedCode.getTokens());
-        }
-        
-        // no point in continuing when this is null
-        if(snippets.isEmpty()){
-            return null;
-        }
-        // add this file to our list of processed files
-        SourceCodeFile sourceCodeFile = new SourceCodeFile();
-        sourceCodeFile.setSnippets(snippets);
-        // now add it up to the main list
-        return sourceCodeFile;
+        methodSplitter = new CodeSplitJava();
+        // use parent method for convertSourceText
+        return super.convertSourceText(sourceCodeText);
     }
-    
-    
-    /**
-     * Convert a piece of Java source code into a form represented by tokens.
-     * @param textSnippet   A snippet of Java source code (preferably a methods)
-     * @return A token string for the given piece of code
-     */
-    @Override
-    public SourceCodeSnippet ConvertSnippetToTokens(final String textSnippet){
-        // the variable where we store the results
-        String result = "";
-        // the lines for this method            
-        String[] lines = textSnippet.split("\n");
-        // now iterate each line
-        for(final String line : lines){
-            // get the source code line converted to tokens
-            final String tokenizedLine = processLine(line);
-            // if the result was null, continue to the next line
-            if(tokenizedLine == null){
-                continue;
-            }
-            // get the lines together
-            result = result.concat(tokenizedLine);
-        }
-        // avoid empty results
-        if(result.isEmpty()){
-            return null;
-        }
-        // remove the empty spaces
-        result = result.replaceAll(" ", "");
-        
-        // add this information inside an object
-        final SourceCodeSnippet snippet = new SourceCodeSnippet();
-        // add the original code and the transformed code
-        // TODO, redundant creation of two snippet objects, needs to be improved
-        snippet.setText(textSnippet);
-        snippet.setTokens(result);
-        // all done
-        return snippet;
-    }
-    
-    
     
     
     /**
@@ -197,7 +83,8 @@ public class CodeConvertToTokensJava extends TemplateCodeConvertToTokens{
      * @param line  The line to be processed
      * @return      A token string or null if not possible to process
      */
-    private String processLine(String line) {
+    @Override
+    protected String processLine(String line) {
         // remove the empty lines
         final String trimmedLine = line.trim();
         // no need to continue if result was empty after this operation
@@ -229,7 +116,7 @@ public class CodeConvertToTokensJava extends TemplateCodeConvertToTokens{
         line = regex.replaceMethodsWithKeyword(line);
 
         // replace the known tokens        
-        for(String[] token : tokensListJava){
+        for(String[] token : tokensList){
             line = regex.replaceWithKeyword(token[0], "º"+token[1], line);
         }
 
@@ -241,9 +128,9 @@ public class CodeConvertToTokensJava extends TemplateCodeConvertToTokens{
         return line;
     }
     
-    
-    // what we use as default to convert java code to tokenized form
-    final String defaultTokenContentJava = 
+    public CodeConvertToTokensJava() {
+        // what we use as default to convert java code to tokenized form
+        defaultTokenContent = 
             "// Tokens related to Java language up to version 8\n" +
             "// to remember, replacements occur by order of listing\n" +
             "// based on http://docs.oracle.com/javase/specs/jls/se8/html"
@@ -359,5 +246,8 @@ public class CodeConvertToTokensJava extends TemplateCodeConvertToTokens{
             "~\n" +
             "?\n" +
             ":";
-
+        tokensFile = "tokens-java.txt";
+        tokenMinSize = 60;
+        this.initializeTokens();
+    }
 }
