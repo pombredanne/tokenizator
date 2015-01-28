@@ -14,13 +14,8 @@
 
 package tokenizedLanguages.Java;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
 import templates.TemplateCodeConvertToTokens;
 import tokenizator.SourceCodeFile;
-import tokenizator.SourceCodeSnippet;
-import utils.files;
 import utils.regex;
 import utils.text;
 

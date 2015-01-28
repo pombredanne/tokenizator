@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import tokenizator.SourceCodeFile;
 import tokenizator.SourceCodeSnippet;
-import templates.TemplateCodeSplit;
 import utils.files;
 
 /**
@@ -28,8 +27,11 @@ import utils.files;
 public abstract class TemplateCodeConvertToTokens {
 
     // definitions that can be changed
+    protected int tokenMinSize = 60;
+    
+    
+    // variables used internally
     protected String tokensFile;
-    protected int tokenMinSize;
     // variables used inside the code
     protected String tokenContent;
     // where we store our tokensListJava
@@ -81,12 +83,18 @@ public abstract class TemplateCodeConvertToTokens {
             // get the lines together
             result = result.concat(tokenizedLine);
         }
+        // remove the empty spaces
+        result = result.replaceAll(" ", "");
+        
         // avoid empty results
         if(result.isEmpty()){
             return null;
         }
-        // remove the empty spaces
-        result = result.replaceAll(" ", "");
+        
+        // avoid short tokenized methods because of too many false positives
+        if(result.length() < tokenMinSize){
+            return null;
+        }
         
         // add this information inside an object
         final SourceCodeSnippet snippet = new SourceCodeSnippet();
@@ -140,6 +148,12 @@ public abstract class TemplateCodeConvertToTokens {
             SourceCodeSnippet snippet = iterator.next();
             // convert the code to tokens
             final SourceCodeSnippet  tokenizedCode = ConvertSnippetToTokens(snippet.getText());
+            // avoid null results
+            if(tokenizedCode == null){
+                iterator.remove();
+                continue;
+            }
+
             // add up the new token data
             snippet.setTokens(tokenizedCode.getTokens());
         }

@@ -62,7 +62,6 @@ public class SourceCodeFile implements Comparable<SourceCodeFile>{
      * @param snippets 
      */
     public void setSnippets(final ArrayList<SourceCodeSnippet> snippets) {
-        //this.snippetsMatched = snippetsMatched;
         this.snippetsToMatch = snippets;
     }
 
